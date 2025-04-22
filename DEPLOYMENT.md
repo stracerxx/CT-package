@@ -20,15 +20,22 @@ cd CT-package
 
 ### 2. Configure Environment Variables
 
-Create a `.env` file in the root directory with the following variables:
+Create a `.env` file in the root directory based on the provided `.env.example` file:
+
+```bash
+cp .env.example .env
+```
+
+Then edit the `.env` file to set your specific configuration values:
 
 ```
-# Database
+# Database Configuration
 DB_USER=postgres
-DB_PASSWORD=your_secure_password
+DB_PASSWORD=change_this_to_a_strong_password
 
 # Security
-JWT_SECRET=your_secure_jwt_secret
+# Generate a strong JWT secret with: openssl rand -hex 32
+JWT_SECRET=change_this_to_a_secure_random_string_at_least_32_characters_long
 
 # API Keys (optional)
 OPENAI_API_KEY=your_openai_api_key
@@ -42,7 +49,7 @@ FRONTEND_URL=https://your-domain.com
 BASE_URL=https://your-domain.com
 NEXT_PUBLIC_API_URL=https://your-domain.com/api
 
-# Email (optional)
+# Email Configuration (optional)
 SMTP_SERVER=smtp.your-email-provider.com
 SMTP_PORT=587
 SMTP_USERNAME=your_email@example.com
@@ -50,15 +57,28 @@ SMTP_PASSWORD=your_email_password
 EMAIL_FROM=noreply@your-domain.com
 ```
 
+**Important Security Notes:**
+
+1. Generate a strong JWT secret using the command: `openssl rand -hex 32`
+2. Use strong, unique passwords for the database
+3. Keep your `.env` file secure and never commit it to version control
+
 ### 3. Deploy with Docker Compose
 
 For production deployment:
 
 ```bash
-docker-compose -f docker-compose.prod.yml up -d
+# Build and start all services in detached mode
+docker-compose -f docker-compose.prod.yml up -d --build
 ```
 
-This will start all services in detached mode.
+This will build the Docker images and start all services in detached mode. The `--build` flag ensures that the images are rebuilt with the latest code changes.
+
+You can monitor the deployment process with:
+
+```bash
+docker-compose -f docker-compose.prod.yml logs -f
+```
 
 ### 4. Initialize the Database
 
@@ -193,6 +213,32 @@ If the backend API is not responding:
    ```
 
 3. Verify that the database migrations have been applied.
+
+### 404 NOT_FOUND Errors
+
+If you're seeing 404 NOT_FOUND errors when accessing the application:
+
+1. Ensure the Next.js application is properly built:
+   ```bash
+   docker-compose -f docker-compose.prod.yml exec frontend ls -la .next
+   ```
+   You should see the `.next` directory with build files.
+
+2. Check that the environment variables are correctly set:
+   ```bash
+   docker-compose -f docker-compose.prod.yml exec frontend env | grep NEXT
+   ```
+
+3. Verify that the frontend container is using production mode:
+   ```bash
+   docker-compose -f docker-compose.prod.yml exec frontend env | grep NODE_ENV
+   ```
+   It should show `NODE_ENV=production`.
+
+4. If the issue persists, try rebuilding the frontend container:
+   ```bash
+   docker-compose -f docker-compose.prod.yml up -d --build frontend
+   ```
 
 ## Security Considerations
 
