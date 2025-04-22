@@ -1,4 +1,5 @@
 {
+  "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "devCommand": "npm run dev",
@@ -11,6 +12,10 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://your-backend-api-url.com"
+    "NEXT_PUBLIC_API_URL": "https://your-backend-api-url.com",
+    "NODE_ENV": "production"
+  },
+  "github": {
+    "silent": true
   }
 }
