@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import uvicorn
+import os
 
 # Import local modules (to be created)
 from config.database import engine, Base, get_db
@@ -49,6 +50,34 @@ def read_root():
 @app.get("/api/health")
 def health_check():
     return {"status": "healthy"}
+
+@app.get("/api/db-health")
+def db_health_check(db: Session = Depends(get_db)):
+    try:
+        # Try to execute a simple query
+        db.execute("SELECT 1").scalar()
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "details": {
+                "host": os.getenv("DB_HOST", "unknown"),
+                "port": os.getenv("DB_PORT", "unknown"),
+                "database": os.getenv("DB_NAME", "unknown"),
+                "user": os.getenv("DB_USER", "unknown")
+            }
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": str(e),
+            "details": {
+                "host": os.getenv("DB_HOST", "unknown"),
+                "port": os.getenv("DB_PORT", "unknown"),
+                "database": os.getenv("DB_NAME", "unknown"),
+                "user": os.getenv("DB_USER", "unknown")
+            }
+        }
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
