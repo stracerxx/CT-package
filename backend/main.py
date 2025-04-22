@@ -33,7 +33,7 @@ app.include_router(system_prompt.router, prefix="/api/system", tags=["System Pro
 app.include_router(rss_feeds.router, prefix="/api/rss", tags=["RSS Feeds"])
 app.include_router(trading.router, prefix="/api/trading", tags=["Trading"])
 app.include_router(wallet.router, prefix="/api/wallet", tags=["Wallet"])
- 
+
 
 # Root endpoint
 @app.get("/")
@@ -44,8 +44,9 @@ def read_root():
         "version": "0.1.0"
     }
 
-# Health check endpoint
+# Health check endpoints
 @app.get("/health")
+@app.get("/api/health")
 def health_check():
     return {"status": "healthy"}
 
